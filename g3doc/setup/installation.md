@@ -45,7 +45,7 @@ There are two changes to be made to the execution commands like the following.
 
 ```bash
 # Install cudatoolkit-dev instead of cudatoolkit.
-conda install -c conda-forge cudatoolkit-dev=11.2 cudnn=8.1.0
+conda install -c conda-forge cudatoolkit-dev=11.2 cudatoolkit=11.2 cudnn=8.1.0
 ```
 
 ```bash
