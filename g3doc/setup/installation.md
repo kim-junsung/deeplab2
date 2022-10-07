@@ -184,8 +184,8 @@ To compile Custom Ops for fast inference, CUDA headers need to be linked to tens
 
 In a conda environment, the CUDA installation directory ${CUDA_DIR} containing the
 `include` folder can be found using `conda list cudatoolkit`, and it's usually at
-`$CONDA_PREFIX/pkgs/cudatoolkit`. In this case, ${CUDA_DIR} needs to be set to 
-`$CONDA_PREFIX/pkgs/cudatoolkit`.
+`$CONDA_PREFIX/pkgs/cuda-toolkit`. In this case, ${CUDA_DIR} needs to be set to 
+`$CONDA_PREFIX/pkgs/cuda-toolkit`.
 
 Find the tensorflow package installation directory via `pip show tensorflow`.
 Then go to the directory and `cd` to `tensorflow/include/third_party/gpus/`. 
