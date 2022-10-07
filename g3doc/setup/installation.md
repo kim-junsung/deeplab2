@@ -1,5 +1,10 @@
 # DeepLab2
 
+## System-level Assumption
+
+We run deeplab2 on a Nvidia GPU-equipped computer running Ubuntu 20.04 x86_64. 
+The latest GPU driver from Nvidia is expected to be installed. 
+
 ## **Requirements**
 
 DeepLab2 depends on the following libraries:
@@ -11,6 +16,8 @@ DeepLab2 depends on the following libraries:
 *   Tensorflow 2.6
 *   Keras 2.6
 *   Cython
+*   immutabledict
+*   pyyaml
 *   [Google Protobuf](https://developers.google.com/protocol-buffers)
 *   [Orbit](https://github.com/tensorflow/models/tree/master/orbit)
 *   [pycocotools](https://github.com/cocodataset/cocoapi/tree/master/PythonAPI/pycocotools)
@@ -21,28 +28,34 @@ DeepLab2 depends on the following libraries:
 ### Git Clone the Project
 
 Clone the
-[`google-research/deeplab2`](https://github.com/google-research/deeplab2)
+[`deeplab2`](https://github.com/kim-junsung/deeplab2)
 repository.
 
 ```bash
 mkdir ${YOUR_PROJECT_NAME}
 cd ${YOUR_PROJECT_NAME}
-git clone https://github.com/google-research/deeplab2.git
+git clone https://github.com/kim-junsung/deeplab2.git
 ```
 
-### Install TensorFlow via PIP
+### Install TensorFlow via PIP in a conda environment
+
+**NOTE:** We will use deeplab2 in a conda environment. Install tensorflow
+2.6 in a conda environment by following the instructions at https://www.tensorflow.org/install/pip. 
+There are two changes to be made to the execution commands like the following.
 
 ```bash
-# Install tensorflow 2.6 as an example.
+# Install cudatoolkit-dev instead of cudatoolkit.
+conda install -c conda-forge cudatoolkit-dev=11.2 cudatoolkit=11.2 cudnn=8.1.0
+```
+
+```bash
+# Install tensorflow 2.6 and keras 2.6 by specifying the version number, respectively.
 # This should come with compatible numpy package.
 pip install tensorflow==2.6 keras==2.6
 ```
 
-**NOTE:** You should find the right Tensorflow version according to your own
-configuration at
-https://www.tensorflow.org/install/source#tested_build_configurations. You also
-need to choose the right cuda version as listed on the page if you want to run
-with GPU.
+**NOTE:** We assume that the conda environment is named deeplab2. 
+
 
 ### Install Protobuf
 
@@ -57,6 +70,15 @@ Alternatively, you can also download the package from web on other platforms.
 Please refer to https://github.com/protocolbuffers/protobuf for more details
 about installation.
 
+### Install g++-7
+
+Ubuntu 20.04 comes with gcc9 while tensorflow 2.6 is not compatible with gcc9.
+Hence, we need to install g++-7 for deeplab2.
+
+```bash
+sudo apt-get install g++-7
+```
+
 ### Other Libraries
 
 The remaining libraries can be installed via pip:
@@ -68,6 +90,10 @@ pip install pillow
 pip install matplotlib
 # Cython
 pip install cython
+# immutabledict
+pip install immutabledict
+# pyyaml
+pip install pyyaml
 ```
 
 ### Install Orbit
@@ -129,6 +155,13 @@ here is an example:
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/models:`pwd`/cocoapi/PythonAPI
 ```
 
+This can be automated when the conda environment is activated. 
+
+```bash
+mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+echo "export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/models:`pwd`/cocoapi/PythonAPI" >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+```
+
 ### Compile Protocol Buffers
 
 In DeepLab2, we define
@@ -143,6 +176,25 @@ ${PATH_TO_PROTOC} deeplab2/*.proto --python_out=.
 
 # Alternatively, if protobuf compiler is globally accessible, you can simply run:
 protoc deeplab2/*.proto --python_out=.
+```
+
+### Link CUDA headers
+
+To compile Custom Ops for fast inference, CUDA headers need to be linked to tensorflow.
+
+In a conda environment, the CUDA installation directory ${CUDA_DIR} containing the
+`include` folder can be found using `conda list cudatoolkit`, and it's usually at
+`$CONDA_PREFIX/pkgs/cuda-toolkit`. In this case, ${CUDA_DIR} needs to be set to 
+`$CONDA_PREFIX/pkgs/cuda-toolkit`.
+
+Find the tensorflow package installation directory via `pip show tensorflow`.
+Then go to the directory and `cd` to `tensorflow/include/third_party/gpus/`. 
+(If it doesn't exist, create one.)
+
+Symlink your CUDA include directory here:
+
+```
+ln -s ${CUDA_DIR} ./cuda
 ```
 
 ### (Optional) Compile Custom Ops
@@ -170,7 +222,7 @@ ${OP_NAME}.cc ${OP_NAME}_kernel.cc -o ${OP_NAME}.so -fPIC ${TF_CFLAGS[@]} ${TF_L
 nvcc -std=c++14 -c -o ${OP_NAME}_kernel.cu.o ${OP_NAME}_kernel.cu.cc \
   ${TF_CFLAGS[@]} -D GOOGLE_CUDA=1 -x cu -Xcompiler -fPIC --expt-relaxed-constexpr
 
-g++ -std=c++14 -shared -o ${OP_NAME}.so ${OP_NAME}.cc ${OP_NAME}_kernel.cc \
+g++-7 -std=c++14 -shared -o ${OP_NAME}.so ${OP_NAME}.cc ${OP_NAME}_kernel.cc \
   ${OP_NAME}_kernel.cu.o ${TF_CFLAGS[@]} -fPIC -lcudart ${TF_LFLAGS[@]}
 ```
 
@@ -206,10 +258,10 @@ mentioned above for Linux users:
 
 ```bash
 # CPU
-deeplab2/compile.sh
+bash deeplab2/compile.sh
 
 # GPU
-deeplab2/compile.sh gpu
+bash deeplab2/compile.sh gpu
 ```
 
 ## Troubleshooting
