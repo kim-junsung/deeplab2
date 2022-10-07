@@ -159,7 +159,7 @@ This can be automated when the conda environment is activated.
 
 ```bash
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
-echo "export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/models:`pwd`/cocoapi/PythonAPI" > $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
+echo "export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/models:`pwd`/cocoapi/PythonAPI" >> $CONDA_PREFIX/etc/conda/activate.d/env_vars.sh
 ```
 
 ### Compile Protocol Buffers
