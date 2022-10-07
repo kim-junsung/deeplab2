@@ -183,12 +183,15 @@ protoc deeplab2/*.proto --python_out=.
 To compile Custom Ops for fast inference, CUDA headers need to be linked to tensorflow.
 
 In a conda environment, the CUDA installation directory ${CUDA_DIR} containing the
-`include` folder can be found using `conda list cudatoolkit`
-2.  Go to the directory where tensorflow package is installed. (You can find it
-    via `pip show tensorflow`.)
-3.  Then `cd` to `tensorflow/include/third_party/gpus/`. (If it doesn't exist,
-    create one.)
-4.  Symlink your CUDA include directory here:
+`include` folder can be found using `conda list cudatoolkit`, and it's usually at
+`$CONDA_PREFIX/pkgs/cudatoolkit`. In this case, ${CUDA_DIR} needs to be set to 
+`$CONDA_PREFIX/pkgs/cudatoolkit`.
+
+Find the tensorflow package installation directory via `pip show tensorflow`.
+Then go to the directory and `cd` to `tensorflow/include/third_party/gpus/`. 
+(If it doesn't exist, create one.)
+
+Symlink your CUDA include directory here:
 
 ```
 ln -s ${CUDA_DIR} ./cuda
